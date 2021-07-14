@@ -5,7 +5,6 @@ const settingsPopupSelector = document.querySelector(".popup");
 const settingsButton = document.querySelector(".header__button-settings");
 const contentForm = document.querySelector(".content__form");
 const contentHeader = document.querySelector(".content__header");
-const contentBody = document.querySelector(".content__users");
 
 const popupForm = document.querySelector(".popup__form");
 const inputTimeRedStart = popupForm.querySelector("input[name='redStart']");
@@ -23,8 +22,6 @@ const inputTimeBlueEnd = popupForm.querySelector("input[name='blueEnd']");
 const inputTimeGreenStart = popupForm.querySelector("input[name='greenStart']");
 const inputTimeGreenEnd = popupForm.querySelector("input[name='greenEnd']");
 
-const username = document.querySelector(".content__users-title_name");
-
 export {
   dataTextSeletor,
   prevMonthButton,
@@ -33,7 +30,6 @@ export {
   settingsButton,
   contentForm,
   contentHeader,
-  contentBody,
   inputTimeRedStart,
   inputTimeRedEnd,
   inputTimeYellowStart,
@@ -44,5 +40,4 @@ export {
   inputTimeBlueEnd,
   inputTimeGreenStart,
   inputTimeGreenEnd,
-  username
 };

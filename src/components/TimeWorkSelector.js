@@ -1,9 +1,11 @@
 export default class TimeWorkSelector {
-  constructor(data, stateForm) {
+  constructor(data, stateForm, userId, name) {
     this._data = data;
     this._day = data[0];
     this._time = data[1];
     this._stateForm = stateForm;
+    this._userId = userId;
+    this._name = name;
   }
 
   _getTemplateSelector() {
@@ -30,6 +32,9 @@ export default class TimeWorkSelector {
     this._selectCurrentButtonAtList = this._element.querySelector(".select__item_current");
     // Вставляю данные с сервера
     this._selectInput.setAttribute("data-day", this._day);
+    this._selectInput.setAttribute("data-id", this._userId);
+    this._selectInput.setAttribute("data-name", this._name);
+    this._selectInput.value = this._time;
     this._selectCurrent.setAttribute("data-value", this._time);
     this._selectCurrent.textContent = this._time;
 
@@ -99,8 +104,6 @@ export default class TimeWorkSelector {
         let itemText = item.textContent;
         this._selectInput.value = itemValue;
         this._selectInput.setAttribute("data-color", `${itemColor}`);
-        this._selectInput.setAttribute("data-name", `${itemColor}`);
-        this._selectInput.setAttribute("data-id", `${itemColor}`);
         this._handleRemoveClasses(this._selectCurrent);
         this._selectCurrent.classList.add(`select__item_${itemColor}`);
         this._selectCurrent.textContent = itemText;

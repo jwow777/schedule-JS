@@ -1,10 +1,7 @@
 import './styles.css';
-// import Api from "./components/Api.js";
-import dataJule from "./utils/api";
+import Api from "./components/Api.js";
 import Popup from "./components/Popup";
-import TimeWorkSelector from "./components/TimeWorkSelector";
 import UserRow from "./components/UserRow";
-// import DateColumns from "./components/DateColumns";
 import {
   dataTextSeletor,
   prevMonthButton,
@@ -13,7 +10,6 @@ import {
   settingsButton,
   contentForm,
   contentHeader,
-  contentBody,
   inputTimeRedStart,
   inputTimeRedEnd,
   inputTimeYellowStart,
@@ -23,35 +19,65 @@ import {
   inputTimeBlueStart,
   inputTimeBlueEnd,
   inputTimeGreenStart,
-  inputTimeGreenEnd,
-  username
+  inputTimeGreenEnd
 } from "./utils/constants";
-import dateJule from './utils/api';
 
-// const api = new Api({
-//   baseUrl: "https://scripts.qexsystems.ru"
-// });
+let currentDate = new Date();
+let year = currentDate.getFullYear();
+let month = currentDate.getMonth();
+let currentMonth = month + 1 < 10 ? `0${month + 1}` : month + 1;
+let day = currentDate.getDate();
+let daysPerMonth;
+let monthWord = currentDate.toLocaleString("ru", { month: "long" });
+
+const api = new Api({
+  baseUrl: "https://scripts.qexsystems.ru/kmrd/schedule/settings.php"
+});
+
+// Дефолтные значения
+let usersDataList = {};
+let settings = [
+  "09:00-14:00",
+  "10:00-15:00",
+  "11:00-16:00",
+  "12:00-18:00",
+  "13:00-19:00"
+]
+
+// Хранилище
+let globalData = {};
+let globalSettings = {};
+
+Promise.all([api.getUsersInfo(`${currentMonth}.${year}`), api.getSettings()])
+.then(([usersData, settingsData]) => {
+  usersDataList = usersData;
+  settings = settingsData;
+})
+.catch((err) => console.log(err));
+
+globalData = usersDataList;
+globalSettings = settings;
 
 let stateForm = {
   timeRed: {
-    start: "06:00",
-    end: "17:00"
+    start: settings[0].substr(0,5),
+    end: settings[0].substr(6)
   },
   timeYellow: {
-    start: "11:00",
-    end: "17:00"
+    start: settings[1].substr(0,5),
+    end: settings[1].substr(6)
   },
   timePurple: {
-    start: "10:00",
-    end: "17:00"
+    start: settings[2].substr(0,5),
+    end: settings[2].substr(6)
   },
   timeBlue: {
-    start: "09:00",
-    end: "17:00"
+    start: settings[3].substr(0,5),
+    end: settings[3].substr(6)
   },
   timeGreen: {
-    start: "08:00",
-    end: "17:00"
+    start: settings[4].substr(0,5),
+    end: settings[4].substr(6)
   }
 };
 
@@ -66,19 +92,6 @@ inputTimeBlueStart.value = stateForm.timeBlue.start;
 inputTimeBlueEnd.value = stateForm.timeBlue.end;
 inputTimeGreenStart.value = stateForm.timeGreen.start;
 inputTimeGreenEnd.value = stateForm.timeGreen.end;
-
-let currentDate = new Date();
-let year = currentDate.getFullYear();
-let month = currentDate.getMonth();
-let day = currentDate.getDate();
-let daysPerMonth;
-let monthWord = currentDate.toLocaleString("ru", { month: "long" });
-
-// const data = api.getUsersInfo(
-//   `${month + 1 < 10 ? `0${month}` : month}.${year}`
-// );
-
-// console.log(dataJule);
 
 const settingsPopup = new Popup(
   settingsPopupSelector,
@@ -115,6 +128,21 @@ const settingsPopup = new Popup(
     ['red', 'yellow', 'purple', 'blue', 'green'].forEach((item) => {
       handleChangeTimeAtTable(item);
     });
+    // Запрос на сохранение настроек
+    let formdata = new FormData();
+    formdata.append("action", "schedule");
+    formdata.append("time[]", `${stateForm.timeRed.start}-${stateForm.timeRed.end}`);
+    formdata.append("time[]", `${stateForm.timeYellow.start}-${stateForm.timeYellow.end}`);
+    formdata.append("time[]", `${stateForm.timePurple.start}-${stateForm.timePurple.end}`);
+    formdata.append("time[]", `${stateForm.timeBlue.start}-${stateForm.timeBlue.end}`);
+    formdata.append("time[]", `${stateForm.timeGreen.start}-${stateForm.timeGreen.end}`);
+
+    api.saveSettings(formdata)
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));
+    // Изменение полей в таблице и сохранение на сервере
+    handleSubmit();
+    // Закрытие попапа настроек
     this.close();
   }
 );
@@ -143,9 +171,8 @@ const handleChangeTimeAtTable = (color) => {
   input.forEach((item) => {
     const currentValue = item.closest('.select').querySelector('.select__current');
     item.value = currentValue.getAttribute('data-value');
-    console.log(currentValue);
   })
-}
+};
 
 // Месяц с заглавной буквы
 const firstCharacter = (str) => {
@@ -252,7 +279,14 @@ const bodyHead = (year, month, day) => {
   dataTextSeletor.textContent = `${monthWord} ${year}`;
   handleChangeDaysPerMonth(month, year);
   createColumnsOfDay(daysPerMonth, month, year);
-  userList(dateJule, stateForm);
+  // Здесь запрос с даннымы за месяц
+  let currentMonth = month + 1;
+  api.getUsersInfo(`${currentMonth < 10 ? `0${currentMonth}` : currentMonth}.${year}`)
+  .then((res) => {
+    globalData = res;
+    userList(globalData, stateForm);    
+  })
+  .catch((err) => console.log(err));
 };
 
 // Переключение на пред месяц
@@ -283,7 +317,34 @@ firstCharacter(monthWord);
 dataTextSeletor.textContent = `${monthWord} ${year}`;
 handleChangeDaysPerMonth(month, year);
 createColumnsOfDay(daysPerMonth, month, year);
-userList(dateJule, stateForm);
+userList(globalData, stateForm);
+
+const handleSubmit = () => {
+  let sumbitObj = {};
+  let days = {};
+  const allUserRows = [...contentForm.querySelectorAll('.content__users')];
+  allUserRows.forEach((user) => {
+    const dataUser = user.querySelector('.select__input');
+    const id = dataUser.getAttribute('data-id');
+    const name = dataUser.getAttribute('data-name');
+    const dataUserInputs = [...user.querySelectorAll('.select__input')];
+    dataUserInputs.forEach((input) => {
+      const day = input.getAttribute('data-day');
+      const value = input.value;
+      days = { ...days, [day]: value};    
+    })
+    sumbitObj = { ...sumbitObj, [id]: { name, date: days }}
+  })
+  const resultObj = {
+    action: 'save',
+    date: `${currentMonth}.${year}`,
+    users: sumbitObj,
+  }
+  // Отправка данных на сервер
+  api.postUsersInfo(resultObj)
+  .then((res) => console.log(res))
+  .catch((err) => console.log(err));
+}
 
 settingsPopup.setEventListeners();
 prevMonthButton.addEventListener("click", handleChangePrevMonth);

@@ -2,9 +2,11 @@ import TimeWorkSelector from "./TimeWorkSelector";
 
 export default class UserRow {
   constructor(data, stateForm) {
-    this._data = data[1].date;
+    this._data = data;
+    this._dataUserWork = data[1].date;
     this._stateForm = stateForm;
     this._name = data[1].name;
+    this._userId = data[0];
   }
 
   _getTemplate() {
@@ -18,8 +20,8 @@ export default class UserRow {
 
   generateSelector() {
     this._element = this._getTemplate();
-    Object.entries(this._data).forEach((dataDayUser) => {
-      const select = new TimeWorkSelector(dataDayUser, this._stateForm);
+    Object.entries(this._dataUserWork).forEach((dataDayUser) => {
+      const select = new TimeWorkSelector(dataDayUser, this._stateForm, this._userId, this._name);
       const selectElement = select.generateSelector();
       // Добавляем в DOM
       this._element.append(selectElement);

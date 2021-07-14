@@ -11,61 +11,39 @@ export default class Api {
   }
 
   getUsersInfo(date) {
-    return fetch(`${this._baseUrl}/kmrd/schedule/settings.php?date=${date}`, {
-      method: "GET",
-      headers: this._headers
-    }).then(this._checkResponse);
+    return fetch(`${this._baseUrl}?date=${date}`)
+    .then(this._checkResponse);
   }
 
-  // getInitialCards() {
-  //   return fetch(`${this._baseUrl}/cards`, {
-  //     method: "GET",
-  //     headers: this._headers
-  //   }).then(this._checkResponse);
-  // }
+  postUsersInfo(data) {
+    return fetch(`${this._baseUrl}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data),
+      redirect: 'follow'
+    })
+    .then(this._checkResponse);
+  }
 
-  // patchUserInfo(userData) {
-  //   return fetch(`${this._baseUrl}/users/me`, {
-  //     method: "PATCH",
-  //     headers: this._headers,
-  //     body: JSON.stringify(userData)
-  //   }).then(this._checkResponse);
-  // }
+  getSettings() {
+    let formdata = new FormData();
+    formdata.append("action", "get_schedule");
+    return fetch(`${this._baseUrl}`, {
+      method: "POST",
+      body: formdata,
+      redirect: 'follow'
+    })
+    .then(this._checkResponse);
+  }
 
-  // postCard(cardData) {
-  //   return fetch(`${this._baseUrl}/cards`, {
-  //     method: "POST",
-  //     headers: this._headers,
-  //     body: JSON.stringify(cardData)
-  //   }).then(this._checkResponse);
-  // }
-
-  // deleteCard(cardId) {
-  //   return fetch(`${this._baseUrl}/cards/${cardId}`, {
-  //     method: "DELETE",
-  //     headers: this._headers
-  //   }).then(this._checkResponse);
-  // }
-
-  // like(cardId) {
-  //   return fetch(`${this._baseUrl}/cards/likes/${cardId}`, {
-  //     method: "PUT",
-  //     headers: this._headers
-  //   }).then(this._checkResponse);
-  // }
-
-  // dislike(cardId) {
-  //   return fetch(`${this._baseUrl}/cards/likes/${cardId}`, {
-  //     method: "DELETE",
-  //     headers: this._headers
-  //   }).then(this._checkResponse);
-  // }
-
-  // patchUserAvatar(userData) {
-  //   return fetch(`${this._baseUrl}/users/me/avatar`, {
-  //     method: "PATCH",
-  //     headers: this._headers,
-  //     body: JSON.stringify(userData)
-  //   }).then(this._checkResponse);
-  // }
+  saveSettings(data) {
+    return fetch(`${this._baseUrl}`, {
+      method: "POST",
+      body: data,
+      redirect: 'follow'
+    })
+    .then(this._checkResponse);
+  }
 }
