@@ -1,0 +1,81 @@
+.content {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 20px 20px 20px;
+}
+
+.content__form {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  overflow: auto;
+  padding-bottom: 20px;
+}
+
+.content__form::-webkit-scrollbar {
+  height: 29px;
+}
+
+.content__form::-webkit-scrollbar-track {
+  height: 29px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 100px;
+}
+
+.content__form::-webkit-scrollbar-thumb {
+  height: 29px;
+  background-color: rgba(51, 75, 201, 0.78);
+  border-radius: 100px;
+}
+
+.content__header {
+  width: max-content;
+  height: 43px;
+  display: flex;
+  background-color: rgba(201, 213, 243, 0.36);
+  border-radius: 5px;
+  margin-bottom: 7px;
+}
+
+.content__header-block {
+  width: 105px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+
+.content__header-block_title {
+  width: 170px;
+}
+
+.content__header-block_day {
+  gap: 6px;
+  border-left: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.content__header-title {
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  user-select: none;
+}
+
+.content__header-title_position {
+  font-size: 15px;
+  line-height: 18px;
+  color: rgba(0, 39, 247, 0.6);
+}
+
+.content__header-title_month {
+  font-size: 17px;
+  line-height: 21px;
+  color: rgba(0, 39, 247, 0.6);
+}
+
+.content__header-title_day-of-week {
+  font-size: 17px;
+  line-height: 21px;
+  color: rgb(124, 141, 175, 0.6);
+}
