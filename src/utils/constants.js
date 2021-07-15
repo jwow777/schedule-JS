@@ -2,7 +2,8 @@ const dataTextSeletor = document.querySelector(".header__data-text");
 const prevMonthButton = document.querySelector(".header__data-button_prev");
 const nextMonthButton = document.querySelector(".header__data-button_next");
 const settingsPopupSelector = document.querySelector(".popup");
-const settingsButton = document.querySelector(".header__button-settings");
+const saveButton = document.querySelector(".header__button_save");
+const settingsButton = document.querySelector(".header__button_settings");
 const contentForm = document.querySelector(".content__form");
 const contentHeader = document.querySelector(".content__header");
 
@@ -27,6 +28,7 @@ export {
   prevMonthButton,
   nextMonthButton,
   settingsPopupSelector,
+  saveButton,
   settingsButton,
   contentForm,
   contentHeader,

@@ -7,6 +7,7 @@ import {
   prevMonthButton,
   nextMonthButton,
   settingsPopupSelector,
+  saveButton,
   settingsButton,
   contentForm,
   contentHeader,
@@ -34,64 +35,50 @@ const api = new Api({
   baseUrl: "https://scripts.qexsystems.ru/kmrd/schedule/settings.php"
 });
 
-// Дефолтные значения
-let usersDataList = {};
-let settings = [
-  "09:00-14:00",
-  "10:00-15:00",
-  "11:00-16:00",
-  "12:00-18:00",
-  "13:00-19:00"
-]
-
 // Хранилище
 let globalData = {};
-let globalSettings = {};
+let globalSettings = [];
+let stateForm = {};
 
 Promise.all([api.getUsersInfo(`${currentMonth}.${year}`), api.getSettings()])
 .then(([usersData, settingsData]) => {
-  usersDataList = usersData;
-  settings = settingsData;
+  globalData = usersData;
+  globalSettings = settingsData;
+  stateForm = {
+    timeRed: {
+      start: globalSettings[0].substr(0,5),
+      end: globalSettings[0].substr(6)
+    },
+    timeYellow: {
+      start: globalSettings[1].substr(0,5),
+      end: globalSettings[1].substr(6)
+    },
+    timePurple: {
+      start: globalSettings[2].substr(0,5),
+      end: globalSettings[2].substr(6)
+    },
+    timeBlue: {
+      start: globalSettings[3].substr(0,5),
+      end: globalSettings[3].substr(6)
+    },
+    timeGreen: {
+      start: globalSettings[4].substr(0,5),
+      end: globalSettings[4].substr(6)
+    }
+  };
+  // Вставляем дефолтные значения времени в инпуты времени в попапе настроек
+  inputTimeRedStart.value = stateForm.timeRed.start;
+  inputTimeRedEnd.value = stateForm.timeRed.end;
+  inputTimeYellowStart.value = stateForm.timeYellow.start;
+  inputTimeYellowEnd.value = stateForm.timeYellow.end;
+  inputTimePurpleStart.value = stateForm.timePurple.start;
+  inputTimePurpleEnd.value = stateForm.timePurple.end;
+  inputTimeBlueStart.value = stateForm.timeBlue.start;
+  inputTimeBlueEnd.value = stateForm.timeBlue.end;
+  inputTimeGreenStart.value = stateForm.timeGreen.start;
+  inputTimeGreenEnd.value = stateForm.timeGreen.end;
 })
 .catch((err) => console.log(err));
-
-globalData = usersDataList;
-globalSettings = settings;
-
-let stateForm = {
-  timeRed: {
-    start: settings[0].substr(0,5),
-    end: settings[0].substr(6)
-  },
-  timeYellow: {
-    start: settings[1].substr(0,5),
-    end: settings[1].substr(6)
-  },
-  timePurple: {
-    start: settings[2].substr(0,5),
-    end: settings[2].substr(6)
-  },
-  timeBlue: {
-    start: settings[3].substr(0,5),
-    end: settings[3].substr(6)
-  },
-  timeGreen: {
-    start: settings[4].substr(0,5),
-    end: settings[4].substr(6)
-  }
-};
-
-// Вставляем дефолтные значения времени в инпуты времени в попапе настроек
-inputTimeRedStart.value = stateForm.timeRed.start;
-inputTimeRedEnd.value = stateForm.timeRed.end;
-inputTimeYellowStart.value = stateForm.timeYellow.start;
-inputTimeYellowEnd.value = stateForm.timeYellow.end;
-inputTimePurpleStart.value = stateForm.timePurple.start;
-inputTimePurpleEnd.value = stateForm.timePurple.end;
-inputTimeBlueStart.value = stateForm.timeBlue.start;
-inputTimeBlueEnd.value = stateForm.timeBlue.end;
-inputTimeGreenStart.value = stateForm.timeGreen.start;
-inputTimeGreenEnd.value = stateForm.timeGreen.end;
 
 const settingsPopup = new Popup(
   settingsPopupSelector,
@@ -140,13 +127,12 @@ const settingsPopup = new Popup(
     api.saveSettings(formdata)
     .then((res) => console.log(res))
     .catch((err) => console.log(err));
-    // Изменение полей в таблице и сохранение на сервере
-    handleSubmit();
     // Закрытие попапа настроек
     this.close();
   }
 );
 
+// Функция изменения значений в списке
 const handleChangeTimeAtTable = (color) => {
   const colorSelector = [...contentForm.querySelectorAll(`div[data-color=${color}]`)];
   const input = [...contentForm.querySelectorAll(`.select__input[data-color=${color}]`)];
@@ -229,13 +215,13 @@ const handleChangeDayPerWeek = (year, month, day) => {
 
 // Добавление колонок с датой
 const createColumnsOfDay = (daysPerMonth, month, year) => {
-  let currentMonth = month + 1;
   for (let day = 1; day <= daysPerMonth; day++) {
+    let currentMonth = month + 1 < 10 ? `0${month + 1}` : month + 1;
     contentHeader.insertAdjacentHTML(
       "beforeend",
       `<div class="content__header-block content__header-block_day">
         <p class="content__header-title content__header-title_month">
-        ${day}.${currentMonth < 10 ? `0${currentMonth}` : currentMonth}</p>
+        ${day}.${currentMonth}</p>
         <p class="content__header-title content__header-title_day-of-week">${handleChangeDayPerWeek(
           year,
           month,
@@ -246,9 +232,36 @@ const createColumnsOfDay = (daysPerMonth, month, year) => {
   }
 };
 
+const handleSubmit = () => {
+  let sumbitObj = {};
+  let days = {};
+  const allUserRows = [...contentForm.querySelectorAll('.content__users')];
+  allUserRows.forEach((user) => {
+    const dataUser = user.querySelector('.select__input');
+    const id = dataUser.getAttribute('data-id');
+    const name = dataUser.getAttribute('data-name');
+    const dataUserInputs = [...user.querySelectorAll('.select__input')];
+    dataUserInputs.forEach((input) => {
+      const day = input.getAttribute('data-day');
+      const value = input.value;
+      days = { ...days, [day]: value};    
+    })
+    sumbitObj = { ...sumbitObj, [id]: { name, date: days }}
+  })
+  const resultObj = {
+    action: 'save',
+    date: `${currentMonth}.${year}`,
+    users: sumbitObj,
+  }
+  // Отправка данных на сервер
+  api.postUsersInfo(resultObj)
+  .then((res) => console.log(res))
+  .catch((err) => console.log(err));
+}
+
 const userList = (dataMonth) => {
   Object.entries(dataMonth).forEach((dataUser) => {
-    const user = new UserRow(dataUser, stateForm);
+    const user = new UserRow(dataUser, stateForm, handleSubmit);
     const userElement = user.generateSelector();
     // Добавляем в DOM
     contentForm.append(userElement);
@@ -319,34 +332,8 @@ handleChangeDaysPerMonth(month, year);
 createColumnsOfDay(daysPerMonth, month, year);
 userList(globalData, stateForm);
 
-const handleSubmit = () => {
-  let sumbitObj = {};
-  let days = {};
-  const allUserRows = [...contentForm.querySelectorAll('.content__users')];
-  allUserRows.forEach((user) => {
-    const dataUser = user.querySelector('.select__input');
-    const id = dataUser.getAttribute('data-id');
-    const name = dataUser.getAttribute('data-name');
-    const dataUserInputs = [...user.querySelectorAll('.select__input')];
-    dataUserInputs.forEach((input) => {
-      const day = input.getAttribute('data-day');
-      const value = input.value;
-      days = { ...days, [day]: value};    
-    })
-    sumbitObj = { ...sumbitObj, [id]: { name, date: days }}
-  })
-  const resultObj = {
-    action: 'save',
-    date: `${currentMonth}.${year}`,
-    users: sumbitObj,
-  }
-  // Отправка данных на сервер
-  api.postUsersInfo(resultObj)
-  .then((res) => console.log(res))
-  .catch((err) => console.log(err));
-}
-
 settingsPopup.setEventListeners();
 prevMonthButton.addEventListener("click", handleChangePrevMonth);
 nextMonthButton.addEventListener("click", handleChangeNextMonth);
+saveButton.addEventListener("click", handleSubmit);
 settingsButton.addEventListener("click", openSettings);

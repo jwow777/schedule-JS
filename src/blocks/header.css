@@ -2,9 +2,9 @@
   width: 100%;
   min-height: 62px;
   background-color: #fff;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   align-items: center;
-  justify-content: space-between;
   box-sizing: border-box;
   padding: 0 20px;
 }
@@ -21,6 +21,7 @@
 }
 
 .header__data-block {
+  justify-self: center;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -39,6 +40,11 @@
   padding: 0;
   outline: none;
   cursor: pointer;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.header__data-button:hover {
+  opacity: 0.8;
 }
 
 .header__data-button_prev {
@@ -63,7 +69,14 @@
   user-select: none;
 }
 
-.header__button-settings {
+.header__buttons-block {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.header__button {
   min-width: 120px;
   height: 35px;
   background-color: #7c8daf;
@@ -77,4 +90,9 @@
   border: none;
   outline: none;
   cursor: pointer;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.header__button:hover {
+  opacity: 0.8;
 }
