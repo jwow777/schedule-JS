@@ -27,6 +27,7 @@ let currentDate = new Date();
 let year = currentDate.getFullYear();
 let month = currentDate.getMonth();
 let currentMonth = month + 1 < 10 ? `0${month + 1}` : month + 1;
+let currentYear = currentDate.getFullYear();
 let day = currentDate.getDate();
 let daysPerMonth;
 let monthWord = currentDate.toLocaleString("ru", { month: "long" });
@@ -44,6 +45,7 @@ Promise.all([api.getUsersInfo(`${currentMonth}.${year}`), api.getSettings()])
 .then(([usersData, settingsData]) => {
   globalData = usersData;
   globalSettings = settingsData;
+
   stateForm = {
     timeRed: {
       start: globalSettings[0].substr(0,5),
@@ -77,6 +79,8 @@ Promise.all([api.getUsersInfo(`${currentMonth}.${year}`), api.getSettings()])
   inputTimeBlueEnd.value = stateForm.timeBlue.end;
   inputTimeGreenStart.value = stateForm.timeGreen.start;
   inputTimeGreenEnd.value = stateForm.timeGreen.end;
+
+  userList(globalData, stateForm);
 })
 .catch((err) => console.log(err));
 
@@ -216,12 +220,12 @@ const handleChangeDayPerWeek = (year, month, day) => {
 // Добавление колонок с датой
 const createColumnsOfDay = (daysPerMonth, month, year) => {
   for (let day = 1; day <= daysPerMonth; day++) {
-    let currentMonth = month + 1 < 10 ? `0${month + 1}` : month + 1;
+    let correctionMonth = month + 1 < 10 ? `0${month + 1}` : month + 1;
     contentHeader.insertAdjacentHTML(
       "beforeend",
       `<div class="content__header-block content__header-block_day">
         <p class="content__header-title content__header-title_month">
-        ${day}.${currentMonth}</p>
+        ${day}.${correctionMonth}</p>
         <p class="content__header-title content__header-title_day-of-week">${handleChangeDayPerWeek(
           year,
           month,
@@ -250,7 +254,7 @@ const handleSubmit = () => {
   })
   const resultObj = {
     action: 'save',
-    date: `${currentMonth}.${year}`,
+    date: currentMonth + '.' + currentYear,
     users: sumbitObj,
   }
   // Отправка данных на сервер
@@ -261,7 +265,7 @@ const handleSubmit = () => {
 
 const userList = (dataMonth) => {
   Object.entries(dataMonth).forEach((dataUser) => {
-    const user = new UserRow(dataUser, stateForm, handleSubmit);
+    const user = new UserRow(dataUser, stateForm);
     const userElement = user.generateSelector();
     // Добавляем в DOM
     contentForm.append(userElement);
@@ -293,8 +297,11 @@ const bodyHead = (year, month, day) => {
   handleChangeDaysPerMonth(month, year);
   createColumnsOfDay(daysPerMonth, month, year);
   // Здесь запрос с даннымы за месяц
-  let currentMonth = month + 1;
-  api.getUsersInfo(`${currentMonth < 10 ? `0${currentMonth}` : currentMonth}.${year}`)
+  let correctionMonth = month + 1;
+  currentMonth = month + 1 < 10 ? `0${correctionMonth}` : `${correctionMonth}`;
+  currentYear = String(year);
+  const date = `${correctionMonth < 10 ? `0${correctionMonth}` : correctionMonth}.${year}`;
+  api.getUsersInfo(date)
   .then((res) => {
     globalData = res;
     userList(globalData, stateForm);    
@@ -330,7 +337,6 @@ firstCharacter(monthWord);
 dataTextSeletor.textContent = `${monthWord} ${year}`;
 handleChangeDaysPerMonth(month, year);
 createColumnsOfDay(daysPerMonth, month, year);
-userList(globalData, stateForm);
 
 settingsPopup.setEventListeners();
 prevMonthButton.addEventListener("click", handleChangePrevMonth);

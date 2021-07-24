@@ -1,11 +1,13 @@
 export default class TimeWorkSelector {
-  constructor(data, stateForm, userId, name) {
+  constructor(data, stateForm, userId, name, userRow, userWorkDays) {
     this._data = data;
     this._day = data[0];
     this._time = data[1];
     this._stateForm = stateForm;
     this._userId = userId;
     this._name = name;
+    this._userRow = userRow;
+    this._userWorkDays = userWorkDays;
   }
 
   _getTemplateSelector() {
@@ -58,6 +60,33 @@ export default class TimeWorkSelector {
     this._selectItemBlue.setAttribute("data-value", `${this._stateForm.timeBlue.start}-${this._stateForm.timeBlue.end}`);
     this._selectItemGreen.setAttribute("data-value", `${this._stateForm.timeGreen.start}-${this._stateForm.timeGreen.end}`);
 
+    // Сравниваю данные из настроек и селектор
+    if (this._selectCurrent.getAttribute("data-value") !== '') {
+      if (this._selectCurrent.getAttribute("data-value") === `${this._stateForm.timeRed.start}-${this._stateForm.timeRed.end}`) {
+        this._selectInput.setAttribute("data-color", "red");
+        this._selectCurrent.setAttribute("data-color", "red");
+        this._selectCurrent.classList.add(`select__item_red`);
+      } else if (this._selectCurrent.getAttribute("data-value") === `${this._stateForm.timeYellow.start}-${this._stateForm.timeYellow.end}`) {
+        this._selectInput.setAttribute("data-color", "yellow");
+        this._selectCurrent.setAttribute("data-color", "yellow");
+        this._selectCurrent.classList.add(`select__item_yellow`);        
+      } else if (this._selectCurrent.getAttribute("data-value") === `${this._stateForm.timePurple.start}-${this._stateForm.timePurple.end}`) {
+        this._selectInput.setAttribute("data-color", "purple");
+        this._selectCurrent.setAttribute("data-color", "purple");
+        this._selectCurrent.classList.add(`select__item_purple`);        
+      } else if (this._selectCurrent.getAttribute("data-value") === `${this._stateForm.timeBlue.start}-${this._stateForm.timeBlue.end}`) {
+        this._selectInput.setAttribute("data-color", "blue");
+        this._selectCurrent.setAttribute("data-color", "blue");
+        this._selectCurrent.classList.add(`select__item_blue`);        
+      } else if (this._selectCurrent.getAttribute("data-value") === `${this._stateForm.timeGreen.start}-${this._stateForm.timeGreen.end}`) {
+        this._selectInput.setAttribute("data-color", "green");
+        this._selectCurrent.setAttribute("data-color", "green");
+        this._selectCurrent.classList.add(`select__item_green`);        
+      } else {
+        return
+      }
+    }
+
     // Вернём элемент наружу
     return this._element;
   }
@@ -109,6 +138,8 @@ export default class TimeWorkSelector {
         this._selectCurrent.textContent = itemText;
         this._selectCurrent.setAttribute("data-value", `${itemValue}`);
         this._selectCurrent.setAttribute("data-color", `${itemColor}`);
+      
+        this._userWorkDays.textContent = [...this._userRow.querySelectorAll('*:not(.select__item_empty).select__current')].length;
         this._selectListHide();
       });
     });
